@@ -48,7 +48,7 @@ namespace StreetArtHunter.Api
 
                 var blobClient = containerClient.GetBlobClient(uniqueBlobName); // 5. Tworzymy klienta reprezentującego ten konkretny plik, który zaraz wgramy                
 
-                _logger.LogInformation($"Rozpoczynam wysyłanie pliku do Blob Storage jako: {uniqueBlobName}");
+                _logger.LogInformation("Rozpoczynam wysyłanie pliku do Blob Storage jako: {uniqueBlobName}", uniqueBlobName);
                 using (var stream = file.OpenReadStream()) // 6. Otwieramy strumień z odebranego pliku i wysyłamy go do kontenera
                 {
                     //await blobClient.UploadAsync(stream, overwrite: true);
@@ -67,7 +67,7 @@ namespace StreetArtHunter.Api
                 }
 
                 string imageUrl = blobClient.Uri.ToString(); // 7. Odczytujemy wygenerowany, publiczny link do naszego obrazka!
-                _logger.LogInformation($"Ukończono! Obrazek dostępny pod adresem: {imageUrl}");
+                _logger.LogInformation("Ukończono! Obrazek dostępny pod adresem: {imageUrl}", imageUrl);
 
                 // ---------------------------------------------
 
@@ -103,7 +103,7 @@ namespace StreetArtHunter.Api
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Błąd podczas przetwarzania: {ex.Message}");
+                _logger.LogError(ex, "Błąd podczas przetwarzania: {ex.Message}", ex.Message);
                 return new StatusCodeResult(StatusCodes.Status500InternalServerError);
             }
         }
