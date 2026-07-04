@@ -89,16 +89,17 @@ namespace StreetArtHunter.Api
 
                 await container.CreateItemAsync(newMural, new PartitionKey(newMural.Location)); // 4. Zapisujemy obiekt do bazy danych jako dokument JSON
 
-                _logger.LogInformation($"Zapisano metadane w Cosmos DB dla ID: {newMural.Id}");
+                _logger.LogInformation("Zapisano metadane w Cosmos DB dla ID: {newMural.Id}", newMural.Id);
 
                 // ---------------------------------------------
 
                 return new OkObjectResult(new
                 {
-                    Message = "Sukces! Zapisano obrazek ORAZ dodano wpis do bazy danych.",
+                    Message = "Sukces! Zapisano obrazek ORAZ dodano wpis do bazy danych. Pipeline działa",
                     MuralId = newMural.Id,
                     ImageUrl = imageUrl
                 });
+
             }
             catch (Exception ex)
             {
