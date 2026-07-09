@@ -99,6 +99,7 @@ namespace StreetArtHunter.Api
                     MuralId = newMural.Id,
                     ImageUrl = imageUrl
                 });
+
             }
             catch (Exception ex)
             {
