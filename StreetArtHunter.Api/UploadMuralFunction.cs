@@ -95,7 +95,7 @@ namespace StreetArtHunter.Api
 
                 return new OkObjectResult(new
                 {
-                    Message = "Success! Image saved AND database entry added. The pipeline is working.",
+                    Message = "Success! Image saved AND database entry added.",
                     MuralId = newMural.Id,
                     ImageUrl = imageUrl
                 });
