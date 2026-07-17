@@ -1,3 +1,4 @@
+using Azure.Messaging.ServiceBus;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using Microsoft.AspNetCore.Http;
@@ -5,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Cosmos;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
+using System.Text.Json;
 
 namespace StreetArtHunter.Api
 {
@@ -20,7 +22,7 @@ namespace StreetArtHunter.Api
         [Function("UploadMural")]
         public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "murals")] HttpRequest req)
         {
-            _logger.LogInformation("Started processing a new mural.");
+            _logger.LogInformation("HTTP POST received at /murals. Starting upload process.");
 
             try
             {
@@ -71,32 +73,35 @@ namespace StreetArtHunter.Api
 
                 // ---------------------------------------------
 
-                // --- INTEGRATION WITH COSMOS DB ---
+                // --- INTEGRATION WITH SERVICE BUS ---
 
-                string cosmosConnectionString = "AccountEndpoint=https://db-streetart-hunter.documents.azure.com:443/;AccountKey=G1o3G6VxmeuIZmdXgvZOsfNbedDAaweb8PqJ4lx65vez9NJIM0jBnxcH1bZv34rvEsBJPJ8rfPsnACDbUQop9w==;";
-                var cosmosClient = new CosmosClient(cosmosConnectionString);
-
-                Database database = await cosmosClient.CreateDatabaseIfNotExistsAsync("StreetArtDb");
-                Container container = await database.CreateContainerIfNotExistsAsync("Murals", "/Location");
-
-                var newMural = new MuralItem
+                var muralId = Guid.NewGuid().ToString();
+                var messagePayload = new
                 {
-                    Id = Guid.NewGuid().ToString(),
+                    Id = muralId,
                     Description = description,
                     Location = location,
                     ImageUrl = imageUrl
                 };
 
-                await container.CreateItemAsync(newMural, new PartitionKey(newMural.Location));
+                string jsonPayload = JsonSerializer.Serialize(messagePayload);
 
-                _logger.LogInformation("Saved metadata in Cosmos DB for ID: {newMural.Id}", newMural.Id);
+                string serviceBusConnectionString = Environment.GetEnvironmentVariable("ServiceBusConnection");
+
+                await using var client = new ServiceBusClient(serviceBusConnectionString);
+                ServiceBusSender sender = client.CreateSender("mural-tasks"); // Name of a queue
+
+                ServiceBusMessage message = new ServiceBusMessage(jsonPayload);
+                await sender.SendMessageAsync(message);
+
+                _logger.LogInformation("Successfully queued metadata processing for Mural ID: {muralId}", muralId);
 
                 // ---------------------------------------------
 
-                return new OkObjectResult(new
+                return new AcceptedResult(string.Empty, new
                 {
-                    Message = "Success! Image saved AND database entry added.",
-                    MuralId = newMural.Id,
+                    Message = "Awesome! We've received your mural. It will appear in the gallery shortly.",
+                    MuralId = muralId,
                     ImageUrl = imageUrl
                 });
 
