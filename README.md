@@ -4,7 +4,7 @@ A serverless backend architecture built to collect, manage, and store crowdsourc
 
 ## 📌 Overview
 
-StreetArtHunter API is an event-driven, Azure Functions-based RESTful service. It allows users to submit images of street art along with relevant metadata (location, description). The system efficiently processes multipart form data, streams images to cloud storage, and utilizes a message broker to asynchronously save structured metadata into a highly scalable NoSQL database, ensuring zero data loss and rapid API response times.
+StreetArtHunter API is an event-driven, Azure Functions-based RESTful service. It allows users to submit images of street art along with relevant metadata (location, description). The system efficiently processes multipart form data, streams images to cloud storage, and utilizes a message broker to asynchronously save structured metadata into a highly scalable NoSQL database, ensuring rapid API response times.
 
 ## 🏗️ Architecture & Technologies
 
